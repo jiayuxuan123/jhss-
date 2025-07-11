@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聚合搜索 - 一站式搜索解决方案</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --accent-color: #fbbc05;
+            --danger-color: #ea4335;
+            --light-bg: #ffffff;
+            --light-text: #333333;
+            --light-card: #f8f9fa;
+            --light-border: #e0e0e0;
+            --dark-bg: #121212;
+            --dark-text: #e0e0e0;
+            --dark-card: #1e1e1e;
+            --dark-border: #333333;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+            background-color: var(--light-bg);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .app-container {
+            background-color: var(--dark-bg);
+        }
+
+        /* Header Styles */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--light-border);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .app-header {
+            border-bottom-color: var(--dark-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .icon-button {
+            color: var(--dark-text);
+        }
+
+        body.dark-mode .icon-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Search Area */
+        .search-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: 2px solid var(--light-border);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            outline: none;
+            background-color: var(--light-card);
+            color: var(--light-text);
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 12px rgba(66, 133, 244, 0.2);
+        }
+
+        body.dark-mode .search-input {
+            background-color: var(--dark-card);
+            color: var(--dark-text);
+            border-color: var(--dark-border);
+        }
+
+        body.dark-mode .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 12px rgba(66, 133, 244, 0.3);
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, var(--primary-color), #3367d6);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3);
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(66, 133, 244, 0.4);
+        }
+
+        .search-button:active {
+            transform: translateY(0);
+        }
+
+        .suggestions-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--light-card);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .suggestions-container {
+            background-color: var(--dark-card);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .suggestion-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .suggestion-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .suggestion-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .suggestion-item i {
+            color: var(--primary-color);
+        }
+
+        /* Tabs and Categories */
+        .categories-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: thin;
+        }
+
+        .category-button {
+            flex-shrink: 0;
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--light-card);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--light-text);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .category-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        body.dark-mode .category-button {
+            background-color: var(--dark-card);
+            color: var(--dark-text);
+        }
+
+        .sources-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .source-card {
+            background-color: var(--light-card);
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-color);
+        }
+
+        .source-card.active {
+            border-color: var(--primary-color);
+            background-color: rgba(66, 133, 244, 0.1);
+        }
+
+        .source-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .source-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        body.dark-mode .source-card {
+            background-color: var(--dark-card);
+        }
+
+        body.dark-mode .source-icon {
+            background-color: #2c2c2c;
+        }
+
+        /* Results Area */
+        .results-container {
+            background-color: var(--light-card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            min-height: 200px;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .results-container {
+            background-color: var(--dark-card);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-border);
+        }
+
+        body.dark-mode .results-header {
+            border-bottom-color: var(--dark-border);
+        }
+
+        .results-content {
+            line-height: 1.7;
+        }
+
+        .results-content p {
+            margin-bottom: 15px;
+        }
+
+        .search-meta {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode .search-meta {
+            color: #aaa;
+        }
+
+        /* History Section */
+        .history-section {
+            margin-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .clear-history {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .history-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .history-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .history-query {
+            font-weight: 500;
+        }
+
+        .history-source {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-action {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .history-action:hover {
+            color: var(--primary-color);
+        }
+
+        body.dark-mode .history-item {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        body.dark-mode .history-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .history-source {
+            color: #aaa;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: auto;
+            padding: 20px 0;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light-border);
+        }
+
+        .disclaimer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        body.dark-mode .app-footer {
+            border-top-color: var(--dark-border);
+            color: #aaa;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: var(--light-card);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        body.dark-mode .modal-content {
+            background-color: var(--dark-card);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .modal-header {
+            border-bottom-color: var(--dark-border);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #888;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--danger-color);
+        }
+
+        body.dark-mode .close-modal:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .source-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .source-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .source-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .source-item-info {
+            flex-grow: 1;
+        }
+
+        .source-item-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .source-item-url {
+            font-size: 0.85rem;
+            color: #888;
+            word-break: break-all;
+        }
+
+        .remove-source {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .remove-source:hover {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--danger-color);
+        }
+
+        .add-source-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            border: 1px solid var(--light-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        body.dark-mode .form-input {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+            border-color: var(--dark-border);
+        }
+
+        .add-button {
+            background: linear-gradient(135deg, var(--secondary-color), #2d9145);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(52, 168, 83, 0.3);
+        }
+
+        .disclaimer-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .disclaimer-text p {
+            margin-bottom: 15px;
+        }
+
+        body.dark-mode .source-item {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        body.dark-mode .source-item-url {
+            color: #aaa;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sources-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .search-button {
+                padding: 0 20px;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header {
+                padding: 15px 0;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                padding: 12px;
+                justify-content: center;
+            }
+            
+            .sources-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            
+            .source-card {
+                padding: 15px 10px;
+            }
+            
+            .source-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-search-plus"></i>
+                <span>聚合搜索</span>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle-button" class="icon-button">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="history-button" class="icon-button">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button id="settings-button" class="icon-button">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" class="search-input" placeholder="输入关键词搜索百度、淘宝、知乎等平台...">
+                    <button id="search-button" class="search-button">
+                        <i class="fas fa-search"></i>
+                        <span>搜索</span>
+                    </button>
+                </div>
+                <div id="suggestions-container" class="suggestions-container">
+                    <!-- Suggestions will be populated here -->
+                </div>
+            </div>
+
+            <div class="categories-container">
+                <button class="category-button active" data-category="all">全部</button>
+                <button class="category-button" data-category="general">综合</button>
+                <button class="category-button" data-category="shopping">购物</button>
+                <button class="category-button" data-category="social">社交</button>
+                <button class="category-button" data-category="video">视频</button>
+                <button class="category-button" data-category="knowledge">知识</button>
+                <button class="category-button" data-category="local">生活</button>
+            </div>
+
+            <div class="sources-container" id="sources-container">
+                <!-- Source cards will be populated here -->
+            </div>
+
+            <div class="results-container">
+                <div class="results-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>搜索结果</h3>
+                </div>
+                <div class="results-content" id="results-content">
+                    <p>请输入搜索关键词并选择搜索源进行搜索。</p>
+                    <p>搜索结果将在新标签页中打开。</p>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3 class="history-title">最近搜索</h3>
+                    <button id="clear-history-button" class="clear-history">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>清除记录</span>
+                    </button>
+                </div>
+                <div class="history-items" id="history-items">
+                    <!-- History items will be populated here -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>聚合搜索工具 - 纯前端实现 | <span class="disclaimer-link" id="disclaimer-link">免责声明</span></p>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">设置</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>管理搜索源</h3>
+                <div class="source-list" id="sources-list">
+                    <!-- Sources list will be populated here -->
+                </div>
+                
+                <h3>添加新搜索源</h3>
+                <div class="add-source-form">
+                    <div class="form-group">
+                        <label class="form-label">名称</label>
+                        <input type="text" id="new-source-name" class="form-input" placeholder="例如：淘宝">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">URL 模板</label>
+                        <input type="text" id="new-source-url" class="form-input" placeholder="例如：https://s.taobao.com/search?q=">
+                        <small>提示：在搜索词位置使用 {query} 或保留原参数</small>
+                    </div>
+                    <button id="add-source-button" class="add-button">添加搜索源</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Modal -->
+    <div id="disclaimer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">免责声明</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="disclaimer-text">
+                    <p>本聚合搜索工具（以下简称"本工具"）是一个纯前端实现的浏览器应用，旨在提供一个便捷的入口，帮助用户通过不同的第三方搜索引擎快速查找信息。</p>
+                    <p><strong>数据与隐私：</strong> 本工具本身不存储、不处理、不生成任何搜索结果内容。所有搜索请求均直接通过浏览器在新标签页中跳转至您选择的第三方搜索引擎官方网站完成，搜索结果亦由该第三方搜索引擎提供。</p>
+                    <p><strong>第三方责任：</strong> 您通过本工具访问任何第三方网站（包括但不限于搜索结果页面）时，应遵守该第三方网站的使用条款和隐私政策。本工具对您访问第三方网站时可能遇到的任何风险、内容（包括但不限于内容的准确性、合法性、安全性、完整性、真实性等）以及因此产生的任何直接或间接损失不承担任何责任。</p>
+                    <p><strong>搜索源：</strong> 本工具提供的搜索源列表仅供参考，本工具不保证这些搜索源的持续可用性或其搜索结果的准确性。用户可以自行添加、修改或删除搜索源。</p>
+                    <p><strong>使用条款：</strong> 使用本工具即表示您已阅读并同意本免责声明的全部内容。如果您不同意本免责声明的任何部分，请立即停止使用本工具。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const sourcesContainer = document.getElementById('sources-container');
+            const resultsContent = document.getElementById('results-content');
+            const settingsButton = document.getElementById('settings-button');
+            const settingsModal = document.getElementById('settings-modal');
+            const disclaimerLink = document.getElementById('disclaimer-link');
+            const disclaimerModal = document.getElementById('disclaimer-modal');
+            const themeToggleButton = document.getElementById('theme-toggle-button');
+            const historyButton = document.getElementById('history-button');
+            const clearHistoryButton = document.getElementById('clear-history-button');
+            const historyItemsContainer = document.getElementById('history-items');
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            
+            // Settings modal elements
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            const sourcesList = document.getElementById('sources-list');
+            const newSourceNameInput = document.getElementById('new-source-name');
+            const newSourceUrlInput = document.getElementById('new-source-url');
+            const addSourceButton = document.getElementById('add-source-button');
+            
+            // Category buttons
+            const categoryButtons = document.querySelectorAll('.category-button');
+            
+            // Local Storage Keys
+            const SOURCES_STORAGE_KEY = 'aggregatedSearchSources';
+            const THEME_STORAGE_KEY = 'aggregatedSearchTheme';
+            const HISTORY_STORAGE_KEY = 'aggregatedSearchHistory';
+            
+            // Default search sources (China focus with more options)
+            let searchSources = [
+                { 
+                    name: '百度', 
+                    url: 'https://www.baidu.com/s?wd=', 
+                    icon: 'fab fa-chrome',
+                    category: 'general',
+                    color: '#2932e1'
+                },
+                { 
+                    name: 'Bing', 
+                    url: 'https://cn.bing.com/search?q=', 
+                    icon: 'fab fa-microsoft',
+                    category: 'general',
+                    color: '#008373'
+                },
+                { 
+                    name: '淘宝', 
+                    url: 'https://s.taobao.com/search?q=', 
+                    icon: 'fas fa-shopping-cart',
+                    category: 'shopping',
+                    color: '#ff4400'
+                },
+                { 
+                    name: '京东', 
+                    url: 'https://search.jd.com/Search?keyword=', 
+                    icon: 'fas fa-shopping-bag',
+                    category: 'shopping',
+                    color: '#c91623'
+                },
+                { 
+                    name: '拼多多', 
+                    url: 'https://youhui.pinduoduo.com/search?keyword=', 
+                    icon: 'fas fa-gem',
+                    category: 'shopping',
+                    color: '#e02e41'
+                },
+                { 
+                    name: '微博', 
+                    url: 'https://s.weibo.com/weibo?q=', 
+                    icon: 'fab fa-weibo',
+                    category: 'social',
+                    color: '#e6162d'
+                },
+                { 
+                    name: '知乎', 
+                    url: 'https://www.zhihu.com/search?q=', 
+                    icon: 'fas fa-question-circle',
+                    category: 'knowledge',
+                    color: '#0084ff'
+                },
+                { 
+                    name: 'Bilibili', 
+                    url: 'https://search.bilibili.com/all?keyword=', 
+                    icon: 'fas fa-play-circle',
+                    category: 'video',
+                    color: '#fb7299'
+                },
+                { 
+                    name: '抖音', 
+                    url: 'https://www.douyin.com/search/', 
+                    icon: 'fab fa-tiktok',
+                    category: 'video',
+                    color: '#000000'
+                },
+                { 
+                    name: '小红书', 
+                    url: 'https://www.xiaohongshu.com/search_result?keyword=', 
+                    icon: 'fas fa-book',
+                    category: 'social',
+                    color: '#ff2442'
+                },
+                { 
+                    name: '微信', 
+                    url: 'https://weixin.sogou.com/weixin?query=', 
+                    icon: 'fab fa-weixin',
+                    category: 'social',
+                    color: '#07c160'
+                },
+                { 
+                    name: '豆瓣', 
+                    url: 'https://www.douban.com/search?q=', 
+                    icon: 'fas fa-film',
+                    category: 'knowledge',
+                    color: '#2e963d'
+                },
+                { 
+                    name: '天眼查', 
+                    url: 'https://www.tianyancha.com/search?key=', 
+                    icon: 'fas fa-building',
+                    category: 'knowledge',
+                    color: '#1368c4'
+                },
+                { 
+                    name: '地图', 
+                    url: 'https://ditu.amap.com/search?query=', 
+                    icon: 'fas fa-map-marker-alt',
+                    category: 'local',
+                    color: '#0092db'
+                },
+                { 
+                    name: '美团', 
+                    url: 'https://bj.meituan.com/s/', 
+                    icon: 'fas fa-utensils',
+                    category: 'local',
+                    color: '#ffbf00'
+                },
+                { 
+                    name: '携程', 
+                    url: 'https://www.ctrip.com/?allianceid=&sid=&kw=', 
+                    icon: 'fas fa-plane',
+                    category: 'local',
+                    color: '#1ba9e9'
+                }
+            ];
+            
+            let activeSource = searchSources[0];
+            let searchHistory = [];
+            let currentCategory = 'all';
+
+            // Theme Functions
+            function applyTheme(theme) {
+                const body = document.body;
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    themeToggleButton.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeToggleButton.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            }
+
+            function loadTheme() {
+                const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+                if (savedTheme) {
+                    applyTheme(savedTheme);
+                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    applyTheme('dark');
+                } else {
+                    applyTheme('light');
+                }
+            }
+
+            function toggleTheme() {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const newTheme = isDarkMode ? 'light' : 'dark';
+                applyTheme(newTheme);
+                localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+            }
+
+            // Source Management
+            function loadSources() {
+                const savedSources = localStorage.getItem(SOURCES_STORAGE_KEY);
+                if (savedSources) {
+                    searchSources = JSON.parse(savedSources);
+                }
+            }
+
+            function saveSources() {
+                localStorage.setItem(SOURCES_STORAGE_KEY, JSON.stringify(searchSources));
+            }
+
+            // History Management
+            function loadHistory() {
+                const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+                if (savedHistory) {
+                    searchHistory = JSON.parse(savedHistory);
+                    renderHistory();
+                }
+            }
+
+            function saveHistory() {
+                localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(searchHistory));
+            }
+
+            function addToHistory(query, source) {
+                // Remove duplicates
+                searchHistory = searchHistory.filter(item => 
+                    !(item.query === query && item.source.url === source.url)
+                );
+                
+                // Add to beginning
+                searchHistory.unshift({
+                    query,
+                    source,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Keep only the last 10 items
+                if (searchHistory.length > 10) {
+                    searchHistory = searchHistory.slice(0, 10);
+                }
+                
+                saveHistory();
+                renderHistory();
+            }
+
+            function clearHistory() {
+                searchHistory = [];
+                saveHistory();
+                renderHistory();
+            }
+
+            // Render Functions
+            function renderSources() {
+                sourcesContainer.innerHTML = '';
+                
+                const filteredSources = currentCategory === 'all' 
+                    ? searchSources 
+                    : searchSources.filter(source => source.category === currentCategory);
+                
+                filteredSources.forEach(source => {
+                    const isActive = source.url === activeSource.url;
+                    
+                    const sourceCard = document.createElement('div');
+                    sourceCard.className = `source-card ${isActive ? 'active' : ''}`;
+                    sourceCard.dataset.url = source.url;
+                    
+                    sourceCard.innerHTML = `
+                        <div class="source-icon" style="background-color: ${source.color}; color: white;">
+                            <i class="${source.icon}"></i>
+                        </div>
+                        <div class="source-name">${source.name}</div>
+                    `;
+                    
+                    sourceCard.addEventListener('click', () => {
+                        activeSource = source;
+                        renderSources();
+                        resultsContent.innerHTML = `
+                            <p>已选择搜索源：<strong>${source.name}</strong></p>
+                            <p>输入关键词后点击搜索按钮进行搜索。</p>
+                        `;
+                    });
+                    
+                    sourcesContainer.appendChild(sourceCard);
+                });
+            }
+
+            function renderSettingsList() {
+                sourcesList.innerHTML = '';
+                
+                searchSources.forEach(source => {
+                    const sourceItem = document.createElement('div');
+                    sourceItem.className = 'source-item';
+                    
+                    sourceItem.innerHTML = `
+                        <div class="source-item-icon" style="background-color: ${source.color}; color: white;">
+                            <i class="${source.icon}"></i>
+                        </div>
+                        <div class="source-item-info">
+                            <div class="source-item-name">${source.name}</div>
+                            <div class="source-item-url">${source.url}</div>
+                        </div>
+                        <button class="remove-source" data-url="${source.url}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    const removeButton = sourceItem.querySelector('.remove-source');
+                    removeButton.addEventListener('click', handleRemoveSource);
+                    
+                    sourcesList.appendChild(sourceItem);
+                });
+            }
+
+            function renderHistory() {
+                historyItemsContainer.innerHTML = '';
+                
+                if (searchHistory.length === 0) {
+                    historyItemsContainer.innerHTML = '<p class="search-meta">暂无搜索记录</p>';
+                    return;
+                }
+                
+                searchHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-content">
+                            <div class="history-query">${item.query}</div>
+                            <div class="history-source">${item.source.name} · ${formatTime(item.timestamp)}</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="history-action" title="重新搜索">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button class="history-action" title="删除记录">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    const redoButton = historyItem.querySelector('.fa-redo').closest('button');
+                    const deleteButton = historyItem.querySelector('.fa-trash').closest('button');
+                    
+                    redoButton.addEventListener('click', () => {
+                        searchInput.value = item.query;
+                        activeSource = item.source;
+                        renderSources();
+                        performSearch();
+                    });
+                    
+                    deleteButton.addEventListener('click', () => {
+                        searchHistory = searchHistory.filter(i => i.timestamp !== item.timestamp);
+                        saveHistory();
+                        renderHistory();
+                    });
+                    
+                    historyItemsContainer.appendChild(historyItem);
+                });
+            }
+
+            function formatTime(timestamp) {
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffInMinutes = Math.floor((now - date) / 60000);
+                
+                if (diffInMinutes < 1) return '刚刚';
+                if (diffInMinutes < 60) return `${diffInMinutes}分钟前`;
+                
+                const diffInHours = Math.floor(diffInMinutes / 60);
+                if (diffInHours < 24) return `${diffInHours}小时前`;
+                
+                const diffInDays = Math.floor(diffInHours / 24);
+                if (diffInDays === 1) return '昨天';
+                
+                return `${date.getMonth() + 1}月${date.getDate()}日`;
+            }
+
+            function renderSuggestions() {
+                if (!searchInput.value.trim()) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                const query = searchInput.value.toLowerCase();
+                const historySuggestions = searchHistory
+                    .filter(item => item.query.toLowerCase().includes(query))
+                    .slice(0, 5);
+                
+                if (historySuggestions.length === 0) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                suggestionsContainer.innerHTML = '';
+                
+                historySuggestions.forEach(item => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'suggestion-item';
+                    suggestionItem.innerHTML = `
+                        <i class="fas fa-history"></i>
+                        <span>${item.query}</span>
+                    `;
+                    
+                    suggestionItem.addEventListener('click', () => {
+                        searchInput.value = item.query;
+                        suggestionsContainer.style.display = 'none';
+                    });
+                    
+                    suggestionsContainer.appendChild(suggestionItem);
+                });
+                
+                suggestionsContainer.style.display = 'block';
+            }
+
+            // Search Functions
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (!query) {
+                    alert('请输入搜索内容！');
+                    return;
+                }
+                
+                if (!activeSource) {
+                    alert('请选择一个搜索源！');
+                    return;
+                }
+                
+                const encodedQuery = encodeURIComponent(query);
+                let searchUrl = activeSource.url;
+                
+                // Handle URL templates
+                if (searchUrl.includes('{query}')) {
+                    searchUrl = searchUrl.replace('{query}', encodedQuery);
+                } else if (searchUrl.includes('=')) {
+                    searchUrl += encodedQuery;
+                } else {
+                    searchUrl += encodedQuery;
+                }
+                
+                // Add to history
+                addToHistory(query, activeSource);
+                
+                // Open in new tab
+                window.open(searchUrl, '_blank');
+                
+                // Update results content
+                resultsContent.innerHTML = `
+                    <p>正在使用 <strong>${activeSource.name}</strong> 搜索 <strong>"${query}"</strong>...</p>
+                    <p class="search-meta">搜索结果已在新标签页中打开</p>
+                `;
+            }
+
+            // Event Handlers
+            function handleSearch() {
+                performSearch();
+            }
+
+            function handleSettingsClick() {
+                renderSettingsList();
+                settingsModal.classList.add('active');
+            }
+
+            function handleDisclaimerClick() {
+                disclaimerModal.classList.add('active');
+            }
+
+            function handleAddSource() {
+                const name = newSourceNameInput.value.trim();
+                const url = newSourceUrlInput.value.trim();
+
+                if (!name || !url) {
+                    alert('名称和URL模板都不能为空！');
+                    return;
+                }
+
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    alert('URL模板必须以 http:// 或 https:// 开头');
+                    return;
+                }
+
+                if (searchSources.some(source => source.url === url)) {
+                    alert('此URL模板已存在！');
+                    return;
+                }
+
+                const newSource = {
+                    name,
+                    url,
+                    icon: 'fas fa-globe',
+                    category: 'general',
+                    color: '#666666'
+                };
+
+                searchSources.push(newSource);
+                saveSources();
+                renderSources();
+                newSourceNameInput.value = '';
+                newSourceUrlInput.value = '';
+                
+                // Set as active source
+                activeSource = newSource;
+                renderSources();
+                
+                alert('搜索源添加成功！');
+            }
+
+            function handleRemoveSource(event) {
+                const urlToRemove = event.currentTarget.dataset.url;
+                searchSources = searchSources.filter(source => source.url !== urlToRemove);
+                saveSources();
+                renderSettingsList();
+                renderSources();
+
+                if (activeSource.url === urlToRemove) {
+                    activeSource = searchSources[0] || null;
+                }
+            }
+
+            function handleCategoryClick(event) {
+                const category = event.currentTarget.dataset.category;
+                currentCategory = category;
+                
+                // Update active button
+                categoryButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+                
+                renderSources();
+            }
+
+            function closeAllModals() {
+                settingsModal.classList.remove('active');
+                disclaimerModal.classList.remove('active');
+            }
+
+            // Initialization
+            function init() {
+                loadTheme();
+                loadSources();
+                loadHistory();
+                renderSources();
+                renderHistory();
+                
+                // Set initial results content
+                resultsContent.innerHTML = `
+                    <p>请输入搜索关键词并选择搜索源进行搜索。</p>
+                    <p>搜索结果将在新标签页中打开。</p>
+                `;
+                
+                // Add event listeners
+                searchButton.addEventListener('click', handleSearch);
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleSearch();
+                    }
+                });
+                
+                searchInput.addEventListener('input', renderSuggestions);
+                
+                settingsButton.addEventListener('click', handleSettingsClick);
+                disclaimerLink.addEventListener('click', handleDisclaimerClick);
+                themeToggleButton.addEventListener('click', toggleTheme);
+                historyButton.addEventListener('click', () => {
+                    const historySection = document.querySelector('.history-section');
+                    historySection.scrollIntoView({ behavior: 'smooth' });
+                });
+                clearHistoryButton.addEventListener('click', clearHistory);
+                
+                addSourceButton.addEventListener('click', handleAddSource);
+                
+                categoryButtons.forEach(button => {
+                    button.addEventListener('click', handleCategoryClick);
+                });
+                
+                closeModalButtons.forEach(button => {
+                    button.addEventListener('click', closeAllModals);
+                });
+                
+                // Close modals when clicking outside
+                [settingsModal, disclaimerModal].forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeAllModals();
+                        }
+                    });
+                });
+                
+                // Close suggestions when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                });
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
